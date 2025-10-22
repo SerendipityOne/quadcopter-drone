@@ -4,5 +4,6 @@
 #include "ALL_DATA.h"
 #include "LED.h"
 #include "delay.h"
+#include "Motor.h"
 
 #endif  // !__ALL_USER_DEFINE_H

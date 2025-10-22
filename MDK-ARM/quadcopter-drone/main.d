@@ -24,8 +24,12 @@ quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_corte
 quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash.h
 quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h
 quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
+quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
+quadcopter-drone\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
+quadcopter-drone\main.o: ../Core/Inc/tim.h
 quadcopter-drone\main.o: ../Core/Inc/gpio.h
 quadcopter-drone\main.o: ../USER/Header/ALL_DEFINE.h
 quadcopter-drone\main.o: ../USER/Header/ALL_DATA.h
 quadcopter-drone\main.o: ../USER/Hardware/LED.h
 quadcopter-drone\main.o: ../USER/System/delay.h
+quadcopter-drone\main.o: ../USER/Hardware/Motor.h

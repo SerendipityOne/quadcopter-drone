@@ -5,6 +5,10 @@
 		"all_define.h": "c",
 		"all_data.h": "c",
 		"led.h": "c",
-		"main.h": "c"
+		"main.h": "c",
+		"gpio.h": "c",
+		"motor.h": "c",
+		"mymath.h": "c",
+		"my_math.h": "c"
 	}
 }
