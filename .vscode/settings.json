@@ -1,0 +1,10 @@
+{
+	"C_Cpp.errorSquiggles": "disabled",
+	"Codegeex.RepoIndex": true,
+	"files.associations": {
+		"all_define.h": "c",
+		"all_data.h": "c",
+		"led.h": "c",
+		"main.h": "c"
+	}
+}
