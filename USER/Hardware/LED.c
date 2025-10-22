@@ -21,14 +21,14 @@
 #define LED4_Toggle() HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin)                 //闪烁
 //--------------------------------------------------------
 
-LED_t LED = {300, ALL_FLASH_LIGHT};
+LED_t LED = {500, ALL_FLASH_LIGHT};
 
 /**
  * @brief LED指示灯控制函数
  * @note 该函数用于控制LED指示灯的状态，根据LED.status的值来执行不同的操作
  *       闪烁间隔时间为300毫秒
  */
-void Pilot_LED(void) {  // 300ms 的间隔时间
+void Pilot_LED(void) {  // 500ms 的间隔时间
   static uint32_t lastTime = 0;
 
   if (uwTick - lastTime < LED.flashTime) {

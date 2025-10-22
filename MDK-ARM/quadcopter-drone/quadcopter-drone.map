@@ -614,7 +614,7 @@ Image Symbol Table
     .data                                    0x20000000   Section       12  stm32f1xx_hal.o(.data)
     .data                                    0x2000000c   Section        4  system_stm32f1xx.o(.data)
     .data                                    0x20000010   Section        8  led.o(.data)
-    LastTime                                 0x20000014   Data           4  led.o(.data)
+    lastTime                                 0x20000014   Data           4  led.o(.data)
     .bss                                     0x20000018   Section       96  libspace.o(.bss)
     HEAP                                     0x20000078   Section      512  startup_stm32f103xb.o(HEAP)
     Heap_Mem                                 0x20000078   Data         512  startup_stm32f103xb.o(HEAP)
