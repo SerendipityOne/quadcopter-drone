@@ -22,11 +22,21 @@
 #include "usbd_custom_hid_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "ANO_DT.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+// 重定义HID报文大小
+#ifdef CUSTOM_HID_EPIN_SIZE
+#undef CUSTOM_HID_EPIN_SIZE
+#define CUSTOM_HID_EPIN_SIZE 0x40U
+#endif  // CUSTOM_HID_EPIN_SIZE
+
+#ifdef CUSTOM_HID_EPOUT_SIZE
+#undef CUSTOM_HID_EPOUT_SIZE
+#define CUSTOM_HID_EPOUT_SIZE 0x40U
+#endif  // CUSTOM_HID_EPOUT_SIZE
 /* Private macro -------------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
@@ -107,7 +117,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
         0x75, 0x08,
         0x91, 0x02,
         /* USER CODE END 0 */
-        0xC0  // END_COLLECTION 结束标志
+        0xC0 /*     END_COLLECTION	             */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
@@ -186,6 +196,28 @@ static int8_t CUSTOM_HID_DeInit_FS(void) {
   */
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state) {
   /* USER CODE BEGIN 6 */
+  extern uint8_t USB_Receive_Buff[64];  // USB接收缓冲区
+  uint8_t USB_Receive_Count = USBD_GetRxCount(&hUsbDeviceFS, CUSTOM_HID_EPOUT_ADDR);
+
+  USBD_CUSTOM_HID_HandleTypeDef* hhid;                               // 定义一个指向USBD_CUSTOM_HID_HandleTypeDef结构体的指针
+  hhid = (USBD_CUSTOM_HID_HandleTypeDef*)hUsbDeviceFS.pClassData;    // 得到USB接收数据的储存地址
+  memcpy(USB_Receive_Buff, hhid->Report_buf, USB_Receive_Count);     // 将接收到的数据复制到USB_Receive_Buff中
+  if (USB_Receive_Buff[1] == 0xaa && USB_Receive_Buff[2] == 0xaF) {  // 帧头正确
+    uint8_t i, check_sum = 0;
+    for (i = 1; i < USB_Receive_Buff[0]; i++) {  // buf[0] 为收到PC来的数据总长度
+      check_sum += USB_Receive_Buff[i];
+    }
+    if (check_sum == USB_Receive_Buff[USB_Receive_Buff[0]]) {            // buf[0] 为收到PC来的数据总长度 最后一个buf为PC发来的本次数据校验和，与本次收到计算出的校验和做比较
+      if (USB_Receive_Buff[4] >= 0x10 && USB_Receive_Buff[5] <= 0x15) {  // 如果收到的是PID数据则要返回校验值
+
+        checkPID = USB_Receive_Buff[4] << 8 | check_sum;  // 返回PID校验数据
+        ANTO_Send(ANTO_CHECK);                            // 收到HID发来的PID则要马上返回校验值给上位机
+      }
+      ANO_Recive((int8_t*)(USB_Receive_Buff + 1));  // hid接收到数据会调用此函数
+    }
+    USB_Receive_Buff[1] = 0;  //帧头清0
+  }
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }

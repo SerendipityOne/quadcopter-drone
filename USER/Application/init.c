@@ -17,10 +17,8 @@ pid_t pidYaw;
 int16_t motor_pwm_value[4];
 
 uint8_t USB_Receive_Buff[64];    // USB接收缓冲区
-uint8_t USB_Receive_Count = 64;  // USB接收计数
+uint8_t USB_Send_Buff[64];      // USB发送缓冲区
 
 void All_Init(void) {
   Motor_Init();
-
-  
 }
