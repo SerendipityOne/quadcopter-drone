@@ -1,6 +1,6 @@
 #ifndef __ALL_USER_DATA_H
 #define __ALL_USER_DATA_H
-
+// *****************************************************************************
 typedef signed char int8_t;
 typedef signed short int int16_t;
 typedef signed int int32_t;
@@ -12,8 +12,19 @@ typedef unsigned short int uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 
+// *****************************************************************************
+#define u8 uint8_t
+#define u16 uint16_t
+#define u32 uint32_t
+
+// *****************************************************************************
 //#define NULL 0
 extern volatile uint32_t uwTick;  //    系统滴答计数器
+// *****************************************************************************
+typedef enum {
+  FALSE = 0,
+  TRUE = !FALSE
+} bool;
 
 typedef struct {
   int16_t accX;   // 加速度计X轴
@@ -60,7 +71,7 @@ typedef volatile struct {
 typedef volatile struct {
   uint8_t unlock;
 } flag_state_t;
-
+// *****************************************************************************
 extern Remote_t Remote;
 extern MPU_t MPU6050;
 extern Ange_t Angle;
