@@ -1,11 +1,14 @@
 #include "MyI2C.h"
 #include "delay.h"
-
+//**********************************************************
 #define SCL_PIN  MPU_SCL_Pin
 #define SDA_PIN  MPU_SDA_Pin
 #define SCL_PORT MPU_SCL_GPIO_Port
 #define SDA_PORT MPU_SDA_GPIO_Port
-
+//**********************************************************
+#define SUCCESS  0
+#define FAILED   1
+//**********************************************************
 /*引脚配置层*/
 
 /**
@@ -39,9 +42,9 @@ void MyI2C_W_SDA(uint8_t BitValue) {
   */
 uint8_t MyI2C_R_SDA(void) {
   uint8_t BitValue;
-  BitValue = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11);  //读取SDA电平
-  delay_us(10);                                     //延时10us，防止时序频率超过要求
-  return BitValue;                                  //返回SDA电平
+  BitValue = HAL_GPIO_ReadPin(SDA_PORT, SDA_PIN);  //读取SDA电平
+  delay_us(10);                                    //延时10us，防止时序频率超过要求
+  return BitValue;                                 //返回SDA电平
 }
 
 /**
@@ -137,4 +140,131 @@ uint8_t MyI2C_ReceiveAck(void) {
   AckBit = MyI2C_R_SDA();  //将应答位存储到变量里
   MyI2C_W_SCL(0);          //拉低SCL，开始下一个时序模块
   return AckBit;           //返回定义应答位变量
+}
+
+/**
+ * @brief I2C读取多个字节
+ * @param addr 从机地址
+ * @param reg 寄存器地址
+ * @param data 数据指针
+ * @param len 数据长度
+ * @return 成功返回SUCCESS，失败返回FAILED
+ */
+uint8_t MyI2C_Read_Bytes(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t len) {
+  MyI2C_Start();
+  MyI2C_SendByte(addr);
+  MyI2C_SendByte(reg);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_Stop();
+
+  MyI2C_Start();
+  MyI2C_SendByte(addr + 1);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  while (len) {
+    *data = MyI2C_ReceiveByte();
+    // 如果不是最后一个字节，发送ACK；最后一个字节发送NACK
+    if (len) {
+      MyI2C_SendAck(0);  // 发送ACK继续读取
+    } else {
+      MyI2C_SendAck(1);  // 发送NACK结束读取
+    }
+    data++;
+    len--;
+  }
+  MyI2C_Stop();
+  return SUCCESS;
+}
+
+/**
+ * @brief I2C写入多个字节
+ * @param addr 从机地址
+ * @param reg 寄存器地址
+ * @param data 数据指针
+ * @param len 数据长度
+ * @return 成功返回SUCCESS，失败返回FAILED
+ */
+uint8_t MyI2C_Write_Bytes(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t len) {
+  MyI2C_Start();
+  MyI2C_SendByte(addr);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_SendByte(reg);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  for (int i = 0; i < len; i++) {
+    MyI2C_SendByte(data[i]);
+    if (MyI2C_ReceiveAck() == FAILED) {
+      MyI2C_Stop();
+      return FAILED;
+    }
+  }
+  MyI2C_Stop();
+  return SUCCESS;
+}
+
+/**
+ * @brief I2C读取一个字节
+ * @param addr 从机地址
+ * @param reg 寄存器地址
+ * @return 读取到的数据
+ */
+uint8_t MyI2C_Read_One_Byte(uint8_t addr, uint8_t reg) {
+  uint8_t data;
+  MyI2C_Start();
+  MyI2C_SendByte(addr);
+  MyI2C_SendByte(reg);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_Stop();
+
+  MyI2C_Start();
+  MyI2C_SendByte(addr + 1);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  data = MyI2C_ReceiveByte();
+  MyI2C_SendAck(1);
+  MyI2C_Stop();
+  return data;
+}
+
+/**
+ * @brief I2C写入一个字节
+ * @param addr 从机地址
+ * @param reg 寄存器地址
+ * @param data 要写入的数据
+ * @return 成功返回SUCCESS，失败返回FAILED
+ */
+uint8_t MyI2C_Write_One_Byte(uint8_t addr, uint8_t reg, uint8_t data) {
+  MyI2C_Start();
+  MyI2C_SendByte(addr);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_SendByte(reg);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_SendByte(data);
+  if (MyI2C_ReceiveAck() == FAILED) {
+    MyI2C_Stop();
+    return FAILED;
+  }
+  MyI2C_Stop();
+  return SUCCESS;
 }

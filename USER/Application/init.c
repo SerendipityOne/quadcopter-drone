@@ -21,4 +21,5 @@ uint8_t USB_Send_Buff[64];      // USB发送缓冲区
 
 void All_Init(void) {
   Motor_Init();
+  MPU6050_Init();
 }

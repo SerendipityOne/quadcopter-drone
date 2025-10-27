@@ -1483,6 +1483,11 @@
               <FileType>5</FileType>
               <FilePath>..\USER\Hardware\USB_HID.h</FilePath>
             </File>
+            <File>
+              <FileName>MPU6050_Regs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\Hardware\MPU6050_Regs.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

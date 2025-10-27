@@ -29,6 +29,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -95,7 +96,7 @@ int main(void) {
   /* USER CODE BEGIN WHILE */
   while (1) {
     ANTO_polling();  //匿名上位机发送数据
-
+    
     Pilot_LED();
     /* USER CODE END WHILE */
 

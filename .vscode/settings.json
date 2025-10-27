@@ -41,6 +41,9 @@
 		"usbd_conf.h": "c",
 		"usbd_custom_hid_if.h": "c",
 		"usbd_customhid.h": "c",
-		"usb_device.h": "c"
+		"usb_device.h": "c",
+		"myi2c.h": "c",
+		"mpu6050.h": "c",
+		"mpu6050_regs.h": "c"
 	},
 }

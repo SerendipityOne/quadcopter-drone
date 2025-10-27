@@ -2,5 +2,8 @@
 #define __MPU6050_H
 
 #include "ALL_DATA.h"
+#include "MPU6050_Regs.h"
 
-#endif // !__MPU6050_H
+uint8_t MPU6050_Init(void);
+
+#endif  // !__MPU6050_H

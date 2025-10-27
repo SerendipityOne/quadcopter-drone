@@ -8,5 +8,6 @@
 #include "delay.h"
 #include "init.h"
 #include "ANO_DT.h"
+#include "MPU6050.h"
 
 #endif  // !__ALL_USER_DEFINE_H
