@@ -6,5 +6,6 @@
 
 uint8_t MPU6050_Init(void);
 void MPU_GetData(void);
+void MPU_SetOffset(void);
 
 #endif  // !__MPU6050_H

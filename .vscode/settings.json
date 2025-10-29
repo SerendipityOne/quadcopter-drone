@@ -45,6 +45,7 @@
 		"myi2c.h": "c",
 		"mpu6050.h": "c",
 		"mpu6050_regs.h": "c",
-		"task.h": "c"
+		"task.h": "c",
+		"flash.h": "c"
 	},
 }
