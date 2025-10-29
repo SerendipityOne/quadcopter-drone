@@ -13,10 +13,12 @@ typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 
 // *****************************************************************************
-#define u8 uint8_t
+#define u8  uint8_t
 #define u16 uint16_t
 #define u32 uint32_t
 
+#define TASK_RUN 1
+#define TASK_STOP 0
 // *****************************************************************************
 //#define NULL 0
 extern volatile uint32_t uwTick;  //    系统滴答计数器
@@ -71,12 +73,17 @@ typedef volatile struct {
 typedef volatile struct {
   uint8_t unlock;
 } flag_state_t;
+
+typedef volatile struct {
+  uint8_t state;
+} task_state_t;
 // *****************************************************************************
 extern Remote_t Remote;
 extern MPU_t MPU6050;
 extern Ange_t Angle;
 
 extern flag_state_t flagState;
+extern task_state_t taskState;
 
 extern pid_t pidRateX;
 extern pid_t pidRateY;

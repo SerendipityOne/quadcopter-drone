@@ -27,16 +27,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-// 重定义HID报文大小
-#ifdef CUSTOM_HID_EPIN_SIZE
-#undef CUSTOM_HID_EPIN_SIZE
-#define CUSTOM_HID_EPIN_SIZE 0x40U
-#endif  // CUSTOM_HID_EPIN_SIZE
-
-#ifdef CUSTOM_HID_EPOUT_SIZE
-#undef CUSTOM_HID_EPOUT_SIZE
-#define CUSTOM_HID_EPOUT_SIZE 0x40U
-#endif  // CUSTOM_HID_EPOUT_SIZE
 /* Private macro -------------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
@@ -72,7 +62,16 @@
   */
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
+// 重定义HID报文大小
+#ifdef CUSTOM_HID_EPIN_SIZE
+#undef CUSTOM_HID_EPIN_SIZE
+#define CUSTOM_HID_EPIN_SIZE 0x40U
+#endif  // CUSTOM_HID_EPIN_SIZE
 
+#ifdef CUSTOM_HID_EPOUT_SIZE
+#undef CUSTOM_HID_EPOUT_SIZE
+#define CUSTOM_HID_EPOUT_SIZE 0x40U
+#endif  // CUSTOM_HID_EPOUT_SIZE
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -99,8 +98,8 @@
 
 /** Usb HID report descriptor. */
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
-    {
-        /* USER CODE BEGIN 0 */
+{
+  /* USER CODE BEGIN 0 */
         0x06, 0x00, 0xff,
         0x09, 0x01,
         0xa1, 0x01,
@@ -116,8 +115,8 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
         0x95, 0x40,
         0x75, 0x08,
         0x91, 0x02,
-        /* USER CODE END 0 */
-        0xC0 /*     END_COLLECTION	             */
+  /* USER CODE END 0 */
+  0xC0    /*     END_COLLECTION	             */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
@@ -155,11 +154,12 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state);
   */
 
 USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops_FS =
-    {
-        CUSTOM_HID_ReportDesc_FS,
-        CUSTOM_HID_Init_FS,
-        CUSTOM_HID_DeInit_FS,
-        CUSTOM_HID_OutEvent_FS};
+{
+  CUSTOM_HID_ReportDesc_FS,
+  CUSTOM_HID_Init_FS,
+  CUSTOM_HID_DeInit_FS,
+  CUSTOM_HID_OutEvent_FS
+};
 
 /** @defgroup USBD_CUSTOM_HID_Private_Functions USBD_CUSTOM_HID_Private_Functions
   * @brief Private functions.
@@ -172,7 +172,8 @@ USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops_FS =
   * @brief  Initializes the CUSTOM HID media low layer
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CUSTOM_HID_Init_FS(void) {
+static int8_t CUSTOM_HID_Init_FS(void)
+{
   /* USER CODE BEGIN 4 */
   return (USBD_OK);
   /* USER CODE END 4 */
@@ -182,7 +183,8 @@ static int8_t CUSTOM_HID_Init_FS(void) {
   * @brief  DeInitializes the CUSTOM HID media low layer
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CUSTOM_HID_DeInit_FS(void) {
+static int8_t CUSTOM_HID_DeInit_FS(void)
+{
   /* USER CODE BEGIN 5 */
   return (USBD_OK);
   /* USER CODE END 5 */
@@ -194,7 +196,8 @@ static int8_t CUSTOM_HID_DeInit_FS(void) {
   * @param  state: Event state
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state) {
+static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
+{
   /* USER CODE BEGIN 6 */
   extern uint8_t USB_Receive_Buff[64];  // USB接收缓冲区
   uint8_t USB_Receive_Count = USBD_GetRxCount(&hUsbDeviceFS, CUSTOM_HID_EPOUT_ADDR);
@@ -251,3 +254,4 @@ static int8_t USBD_CUSTOM_HID_SendReport_FS(uint8_t *report, uint16_t len)
 /**
   * @}
   */
+

@@ -8,6 +8,8 @@
 //**********************************************************
 #define SUCCESS  0
 #define FAILED   1
+#define ACK      0
+#define NACK     1
 //**********************************************************
 /*引脚配置层*/
 
@@ -153,26 +155,22 @@ uint8_t MyI2C_ReceiveAck(void) {
 uint8_t MyI2C_Read_Bytes(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t len) {
   MyI2C_Start();
   MyI2C_SendByte(addr);
-  MyI2C_SendByte(reg);
   if (MyI2C_ReceiveAck() == FAILED) {
     MyI2C_Stop();
     return FAILED;
   }
-  MyI2C_Stop();
+  MyI2C_SendByte(reg);
+  MyI2C_ReceiveAck();
 
   MyI2C_Start();
-  MyI2C_SendByte(addr + 1);
-  if (MyI2C_ReceiveAck() == FAILED) {
-    MyI2C_Stop();
-    return FAILED;
-  }
+  MyI2C_SendByte(addr | 0x01);
+  MyI2C_ReceiveAck();
   while (len) {
     *data = MyI2C_ReceiveByte();
-    // 如果不是最后一个字节，发送ACK；最后一个字节发送NACK
-    if (len) {
-      MyI2C_SendAck(0);  // 发送ACK继续读取
+    if (len == 1) {
+      MyI2C_SendAck(NACK);
     } else {
-      MyI2C_SendAck(1);  // 发送NACK结束读取
+      MyI2C_SendAck(ACK);
     }
     data++;
     len--;
@@ -197,11 +195,8 @@ uint8_t MyI2C_Write_Bytes(uint8_t addr, uint8_t reg, uint8_t* data, uint8_t len)
     return FAILED;
   }
   MyI2C_SendByte(reg);
-  if (MyI2C_ReceiveAck() == FAILED) {
-    MyI2C_Stop();
-    return FAILED;
-  }
-  for (int i = 0; i < len; i++) {
+  MyI2C_ReceiveAck();
+  for (uint8_t i = 0; i < len; i++) {
     MyI2C_SendByte(data[i]);
     if (MyI2C_ReceiveAck() == FAILED) {
       MyI2C_Stop();
@@ -222,11 +217,12 @@ uint8_t MyI2C_Read_One_Byte(uint8_t addr, uint8_t reg) {
   uint8_t data;
   MyI2C_Start();
   MyI2C_SendByte(addr);
-  MyI2C_SendByte(reg);
   if (MyI2C_ReceiveAck() == FAILED) {
     MyI2C_Stop();
     return FAILED;
   }
+  MyI2C_SendByte(reg);
+  MyI2C_ReceiveAck();
   MyI2C_Stop();
 
   MyI2C_Start();
@@ -236,7 +232,7 @@ uint8_t MyI2C_Read_One_Byte(uint8_t addr, uint8_t reg) {
     return FAILED;
   }
   data = MyI2C_ReceiveByte();
-  MyI2C_SendAck(1);
+  MyI2C_SendAck(NACK);
   MyI2C_Stop();
   return data;
 }

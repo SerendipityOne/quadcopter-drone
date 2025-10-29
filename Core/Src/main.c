@@ -88,6 +88,7 @@ int main(void) {
   MX_GPIO_Init();
   MX_TIM2_Init();
   MX_USB_DEVICE_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
   /* USER CODE END 2 */
@@ -95,8 +96,13 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+    if (taskState.state == TASK_RUN) {
+      MPU_GetData();
+      taskState.state = TASK_STOP;
+    }
+  
     ANTO_polling();  //匿名上位机发送数据
-    
+
     Pilot_LED();
     /* USER CODE END WHILE */
 

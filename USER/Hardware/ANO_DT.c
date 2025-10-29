@@ -229,15 +229,15 @@ void ANTO_polling(void)  //
       status = 1;
       break;
     case 1:
-      // ANTO_Send(ANTO_MPU_MAGIC);  //发送MPU6050
-      // delay_ms(30);
+      ANTO_Send(ANTO_MPU_MAGIC);  //发送MPU6050
+      delay_ms(30);
       // ANTO_Send(ANTO_STATUS);  //发送姿态数据
       // delay_ms(30);
       // ANTO_Send(ANTO_RCDATA);  //发送遥控数据
       // delay_ms(30);            //如果采用蓝牙，延时一下让蓝牙发送完成
 
-      ANTO_Send(ANTO_MOTOR);  //发送电机数据
-      delay_ms(30);
+      // ANTO_Send(ANTO_MOTOR);  //发送电机数据
+      // delay_ms(30);
 
       if (*(uint8_t*)&ANTO_Recived_flag != 0)  //一旦接收到上位机的数据，则暂停发送数据到上位机，转而去判断上位机要求飞控做什么。
       {

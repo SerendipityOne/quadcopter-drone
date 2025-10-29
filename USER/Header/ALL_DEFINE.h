@@ -9,5 +9,6 @@
 #include "init.h"
 #include "ANO_DT.h"
 #include "MPU6050.h"
+#include "USB_HID.h"
 
 #endif  // !__ALL_USER_DEFINE_H
