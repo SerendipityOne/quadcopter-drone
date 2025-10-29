@@ -48,9 +48,13 @@ void MPU_GetData(void) {
     //以下对加速度做卡尔曼滤波
     if (i < 3) {
       {
-        static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
-                                              {0.02, 0, 0, 0, 0.001, 0.543},
-                                              {0.02, 0, 0, 0, 0.001, 0.543}};
+        // static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
+        //                                       {0.02, 0, 0, 0, 0.001, 0.543},
+        //                                       {0.02, 0, 0, 0, 0.001, 0.543}};
+        static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.0245, 0.08},
+                                              {0.02, 0, 0, 0, 0.0245, 0.08},
+                                              {0.02, 0, 0, 0, 0.0245, 0.08}};
+
         kalman_1(&ekf[i], (float)mpu[i]);  //一维卡尔曼
         mpu[i] = (int16_t)ekf[i].out;
       }
@@ -66,7 +70,6 @@ void MPU_GetData(void) {
   }
 }
 
-
 /**
  * @brief 设置MPU6050传感器偏移量，用于校准传感器
  * @details 该函数通过在静止状态下多次采样传感器数据来计算偏移量，
@@ -80,15 +83,15 @@ void MPU_GetData(void) {
  * @retval 无
  */
 void MPU_SetOffset(void) {
-  int32_t buffer[6] = {0};   
-  uint8_t k = 30;            
-  uint16_t i;                
+  int32_t buffer[6] = {0};
+  uint8_t k = 30;
+  uint16_t i;
 
   // 定义陀螺仪静止状态的最大和最小误差阈值
   const int8_t MAX_GYRO_QUIET = 5;
   const int8_t MIN_GYRO_QUIET = -5;
-  int16_t lastGyro[3] = {0}; // 上一次陀螺仪读数
-  int16_t errorGyro[3];      // 当前与上一次读数的误差
+  int16_t lastGyro[3] = {0};  // 上一次陀螺仪读数
+  int16_t errorGyro[3];       // 当前与上一次读数的误差
 
   // 初始化偏移数组，重力加速度轴设置初始值
   memset(mpuOffset, 0, sizeof(mpuOffset));
@@ -111,7 +114,7 @@ void MPU_SetOffset(void) {
              (errorGyro[1] > MAX_GYRO_QUIET) || (errorGyro[1] < MIN_GYRO_QUIET) ||
              (errorGyro[2] > MAX_GYRO_QUIET) || (errorGyro[2] < MIN_GYRO_QUIET));
   }
-  
+
   // 采集356组数据，其中前100组作为预热丢弃，后256组用于计算偏移量
   for (i = 0; i < 356; i++) {
     MPU_GetData();

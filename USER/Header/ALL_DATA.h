@@ -19,6 +19,8 @@ typedef unsigned long long uint64_t;
 
 #define TASK_RUN 1
 #define TASK_STOP 0
+
+#define __IO volatile
 // *****************************************************************************
 //#define NULL 0
 extern volatile uint32_t uwTick;  //    系统滴答计数器
