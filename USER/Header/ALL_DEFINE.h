@@ -10,5 +10,6 @@
 #include "ANO_DT.h"
 #include "MPU6050.h"
 #include "USB_HID.h"
+#include "imu.h"
 
 #endif  // !__ALL_USER_DEFINE_H

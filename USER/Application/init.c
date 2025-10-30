@@ -30,7 +30,10 @@ void All_Init(void) {
   Motor_Init();
   MPU6050_Init();
 
-  // delay_ms(5000);  MPU_SetOffset();
+  imu_rest();
+
+  delay_ms(3000);
+	MPU_SetOffset();
 
   HAL_TIM_Base_Start_IT(&htim1);
 }

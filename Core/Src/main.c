@@ -98,9 +98,10 @@ int main(void) {
   while (1) {
     if (taskState.state == TASK_RUN) {
       MPU_GetData();
+      GetAngle(&MPU6050, &Angle, 0.003f);
       taskState.state = TASK_STOP;
     }
-  
+
     ANTO_polling();  //匿名上位机发送数据
 
     Pilot_LED();
