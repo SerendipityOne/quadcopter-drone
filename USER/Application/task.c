@@ -3,6 +3,6 @@
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
   if (htim->Instance == TIM1) {  // 3ms
-    taskState.state = TASK_RUN;
+    if (taskState.state == TASK_STOP) taskState.state = TASK_RUN;
   }
 }

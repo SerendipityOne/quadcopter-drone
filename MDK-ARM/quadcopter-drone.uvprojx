@@ -2112,6 +2112,16 @@
               <FileType>5</FileType>
               <FilePath>..\USER\Application\task.h</FilePath>
             </File>
+            <File>
+              <FileName>ANO_DT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\Application\ANO_DT.c</FilePath>
+            </File>
+            <File>
+              <FileName>ANO_DT.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\Application\ANO_DT.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2146,16 +2156,6 @@
               <FileName>MPU6050.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\Hardware\MPU6050.h</FilePath>
-            </File>
-            <File>
-              <FileName>ANO_DT.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\Hardware\ANO_DT.c</FilePath>
-            </File>
-            <File>
-              <FileName>ANO_DT.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\Hardware\ANO_DT.h</FilePath>
             </File>
             <File>
               <FileName>USB_HID.c</FileName>

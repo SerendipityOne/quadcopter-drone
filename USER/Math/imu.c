@@ -47,8 +47,10 @@ void imu_rest(void) {
 void GetAngle(const MPU_t* mpu, Ange_t* ange, float dt) {
   volatile struct V Gravity, Acc, Gyro, AccGravity;
 
-  static float KpDef = 0.5f;
-  static float KiDef = 0.0003f;
+  // static float KpDef = 0.5f;
+  static float KpDef = 0.0f;
+  static float KiDef = 0.0f;
+  // static float KiDef = 0.0003f;
   //		static  float KiDef = 0.00001f;
 
   float q0_t, q1_t, q2_t, q3_t;
@@ -110,7 +112,7 @@ void GetAngle(const MPU_t* mpu, Ange_t* ange, float dt) {
 #endif
     ange->pitch = asin(2 * NumQ.q0 * NumQ.q2 - 2 * NumQ.q1 * NumQ.q3) * RtA;
 
-    ange->roll = atan2(2 * NumQ.q2 * NumQ.q3 + 2 * NumQ.q0 * NumQ.q1, 1 - 2 * NumQ.q1 * NumQ.q1 - 2 * NumQ.q2 * NumQ.q2) * RtA;  //PITCH
+    ange->roll = atan2(2 * NumQ.q2 * NumQ.q3 + 2 * NumQ.q0 * NumQ.q1, 1 - 2 * NumQ.q1 * NumQ.q1 - 2 * NumQ.q2 * NumQ.q2) * RtA;  //PITCH    ange->roll = atan2f(2 * NumQ.q2 * NumQ.q3 + 2 * NumQ.q0 * NumQ.q1, 1 - 2 * NumQ.q1 * NumQ.q1 - 2 * NumQ.q2 * NumQ.q2) * RtA;  //PITCH
   }
 }
 

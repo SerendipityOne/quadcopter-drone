@@ -32,8 +32,8 @@ void All_Init(void) {
 
   imu_rest();
 
-  delay_ms(3000);
-	MPU_SetOffset();
+  // delay_ms(3000);
+	// MPU_SetOffset();
 
   HAL_TIM_Base_Start_IT(&htim1);
 }

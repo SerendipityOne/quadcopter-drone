@@ -47,20 +47,16 @@ void MPU_GetData(void) {
     mpu[i] = (((int16_t)buffer[i << 1] << 8) | buffer[(i << 1) + 1]) - mpuOffset[i];  //整合为16bit，并减去水平静止校准值
     //以下对加速度做卡尔曼滤波
     if (i < 3) {
-      {
-        // static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
-        //                                       {0.02, 0, 0, 0, 0.001, 0.543},
-        //                                       {0.02, 0, 0, 0, 0.001, 0.543}};
-        static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.0245, 0.08},
-                                              {0.02, 0, 0, 0, 0.0245, 0.08},
-                                              {0.02, 0, 0, 0, 0.0245, 0.08}};
+      // static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
+      //                                       {0.02, 0, 0, 0, 0.001, 0.543},
+      //                                       {0.02, 0, 0, 0, 0.001, 0.543}};
+      static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.0245, 0.08},
+                                            {0.02, 0, 0, 0, 0.0245, 0.08},
+                                            {0.02, 0, 0, 0, 0.0245, 0.08}};
 
-        kalman_1(&ekf[i], (float)mpu[i]);  //一维卡尔曼
-        mpu[i] = (int16_t)ekf[i].out;
-      }
-    }
-    //以下对角速度做一阶低通滤波
-    if (i > 2) {
+      kalman_1(&ekf[i], (float)mpu[i]);  //一维卡尔曼
+      mpu[i] = (int16_t)ekf[i].out;
+    } else {  //以下对角速度做一阶低通滤波
       uint8_t k = i - 3;
       const float factor = 0.75f;  //滤波因素
       static float tBuff[3];
@@ -98,7 +94,7 @@ void MPU_SetOffset(void) {
   mpuOffset[2] = 8192;
 
   // 停止定时器中断，确保数据采集不受干扰
-  HAL_TIM_Base_Stop_IT(&htim1);
+  // HAL_TIM_Base_Stop_IT(&htim1);
 
   // 等待陀螺仪处于静止状态，重复30次以确保稳定性
   while (k--) {
@@ -131,10 +127,9 @@ void MPU_SetOffset(void) {
   for (i = 0; i < 6; i++) {
     mpuOffset[i] = buffer[i] >> 8;
   }
-
-  // 恢复定时器中断
-  HAL_TIM_Base_Start_IT(&htim1);
-
   // 将校准后的偏移量写入Flash存储
   FLASH_Write(mpuOffset, 6);
+
+  // 恢复定时器中断
+  // HAL_TIM_Base_Start_IT(&htim1);
 }
