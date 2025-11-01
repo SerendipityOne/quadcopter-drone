@@ -1,135 +1,115 @@
 #include "MPU6050.h"
-#include "MyI2C.h"
 #include "flash.h"
+#include "i2c.h"
 #include "kalman.h"
 #include "my_math.h"
 #include "string.h"
-//**************************************************************
-extern TIM_HandleTypeDef htim1;
 
-int16_t mpuOffset[6] = {0};
-static volatile int16_t* mpu = (int16_t*)&MPU6050;
 //**************************************************************
-/**
- * @brief 初始化MPU6050
- * @return 成功返回SUCCESS，失败返回ERROR
- */
-uint8_t MPU6050_Init(void) {
-  uint8_t res = SUCCESS;
+#define MPU_I2C_TIMEOUT   100U
+#define MPU_REG_ADDR_SIZE I2C_MEMADD_SIZE_8BIT
+#define FRAME_LEN         14 /* ACC(6) + TEMP(2) + GYR(6) */
+//**************************************************************
+int16_t MpuOffset[6];
+
+extern MPU_t MPU6050;
+//**************************************************************
+// 双缓冲与状态
+static uint8_t ImuBuf[2][FRAME_LEN];   /* 双缓冲 */
+static volatile uint8_t CurIndex = 0;  /* 当前DMA写入缓冲索引 0/1 */
+static volatile uint8_t HasFrame = 0;  /* 是否完成过至少一帧 */
+static volatile uint32_t FrameSeq = 0; /* 完成帧计数 */
+//**************************************************************
+static HAL_StatusTypeDef MPU6050_WriteReg(uint8_t reg, uint8_t val) {
+  return HAL_I2C_Mem_Write(&hi2c1, MPU_ADDR, reg, MPU_REG_ADDR_SIZE, &val, 1, MPU_I2C_TIMEOUT);
+}
+
+static HAL_StatusTypeDef MPU6050_ReadRegs(uint8_t reg, uint8_t* data, uint16_t Len) {
+  return HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR, reg, MPU_REG_ADDR_SIZE, data, Len, MPU_I2C_TIMEOUT);
+}
+//**************************************************************
+/* 初始化MPU6050 */
+HAL_StatusTypeDef MPU6050_Init(void) {
+  HAL_StatusTypeDef res = HAL_OK;
+  uint8_t who = 0;
+
   do {
-    res = MyI2C_Write_One_Byte(MPU_ADDR, MPU_PWR_MGMT1_REG, 0x80);  // 复位唤醒MPU6050，失能温度传感器
-    /* 采样率 = 陀螺仪输出率 / (1 + SMPLRT_DIV) */
-    res += MyI2C_Write_One_Byte(MPU_ADDR, MPU_SAMPLE_RATE_REG, 0x02);  // 设置采样频率为333hz
-    res += MyI2C_Write_One_Byte(MPU_ADDR, MPU_PWR_MGMT1_REG, 0x03);    // 设置设备时钟源，陀螺仪Z轴
-    res += MyI2C_Write_One_Byte(MPU_ADDR, MPU_CFG_REG, 0x03);          // 配置DLPF，一般为采样率一半，0x03(42Hz)
-    res += MyI2C_Write_One_Byte(MPU_ADDR, MPU_GYRO_CFG_REG, 0x18);     // 配置陀螺仪量程，±2000度/秒
-    res += MyI2C_Write_One_Byte(MPU_ADDR, MPU_ACCEL_CFG_REG, 0x09);    // 配置加速度计量程，±4g，低通滤波器为5hz
-  } while (res != SUCCESS);
+    res = MPU6050_WriteReg(MPU_PWR_MGMT1_REG, 0x80); /* 复位唤醒，失能温度 */
+    /* 采样率 = Gyro输出率 / (1 + SMPLRT_DIV) */
+    res |= MPU6050_WriteReg(MPU_SAMPLE_RATE_REG, 0x02); /* ≈333 Hz */
+    res |= MPU6050_WriteReg(MPU_PWR_MGMT1_REG, 0x03);   /* 时钟源 Gyro Z */
+    res |= MPU6050_WriteReg(MPU_CFG_REG, 0x03);         /* DLPF 42 Hz */
+    res |= MPU6050_WriteReg(MPU_GYRO_CFG_REG, 0x18);    /* ±2000 dps */
+    res |= MPU6050_WriteReg(MPU_ACCEL_CFG_REG, 0x09);   /* ±4 g，LPF 5 Hz */
+  } while (res != HAL_OK);
 
-  FLASH_Read(mpuOffset, 6);
-  return SUCCESS;
-}
+  res = MPU6050_ReadRegs(MPU_WHO_AM_I, &who, 1);
 
-void MPU_GetAcc(uint8_t* data) {
-  MyI2C_Read_Bytes(MPU_ADDR, MPU_ACCEL_XOUTH_REG, data, 6);
-}
+  /* 从Flash读取零偏*/
+  // FLASH_Read(MpuOffset, 6);
 
-void MPU_GetGyro(uint8_t* data) {
-  MyI2C_Read_Bytes(MPU_ADDR, MPU_GYRO_XOUTH_REG, data, 6);
-}
-
-void MPU_GetData(void) {
-  uint8_t i, buffer[12];
-  MPU_GetAcc(buffer);
-  MPU_GetGyro(buffer + 6);
-
-  for (i = 0; i < 6; i++) {
-    mpu[i] = (((int16_t)buffer[i << 1] << 8) | buffer[(i << 1) + 1]) - mpuOffset[i];  //整合为16bit，并减去水平静止校准值
-    //以下对加速度做卡尔曼滤波
-    if (i < 3) {
-      // static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
-      //                                       {0.02, 0, 0, 0, 0.001, 0.543},
-      //                                       {0.02, 0, 0, 0, 0.001, 0.543}};
-      static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.0245, 0.08},
-                                            {0.02, 0, 0, 0, 0.0245, 0.08},
-                                            {0.02, 0, 0, 0, 0.0245, 0.08}};
-
-      kalman_1(&ekf[i], (float)mpu[i]);  //一维卡尔曼
-      mpu[i] = (int16_t)ekf[i].out;
-    } else {  //以下对角速度做一阶低通滤波
-      uint8_t k = i - 3;
-      const float factor = 0.75f;  //滤波因素
-      static float tBuff[3];
-
-      mpu[i] = tBuff[k] = tBuff[k] * (1 - factor) + mpu[i] * factor;
-    }
-  }
-}
-
-/**
- * @brief 设置MPU6050传感器偏移量，用于校准传感器
- * @details 该函数通过在静止状态下多次采样传感器数据来计算偏移量，
- *          并将结果保存到Flash中供后续使用。过程包括:
- *          1. 等待陀螺仪稳定（静止状态）
- *          2. 采集大量样本数据
- *          3. 计算平均偏移量
- *          4. 将偏移量写入Flash存储
- * @note 此函数会临时停止定时器中断以确保采样准确性，在函数结束前重新启动定时器
- * @param 无
- * @retval 无
- */
-void MPU_SetOffset(void) {
-  int32_t buffer[6] = {0};
-  uint8_t k = 30;
-  uint16_t i;
-
-  // 定义陀螺仪静止状态的最大和最小误差阈值
-  const int8_t MAX_GYRO_QUIET = 5;
-  const int8_t MIN_GYRO_QUIET = -5;
-  int16_t lastGyro[3] = {0};  // 上一次陀螺仪读数
-  int16_t errorGyro[3];       // 当前与上一次读数的误差
-
-  // 初始化偏移数组，重力加速度轴设置初始值
-  memset(mpuOffset, 0, sizeof(mpuOffset));
-  mpuOffset[2] = 8192;
-
-  // 停止定时器中断，确保数据采集不受干扰
-  // HAL_TIM_Base_Stop_IT(&htim1);
-
-  // 等待陀螺仪处于静止状态，重复30次以确保稳定性
-  while (k--) {
-    do {
-      delay_ms(10);
-      MPU_GetData();
-      // 计算陀螺仪三个轴的读数变化量
-      for (i = 0; i < 3; i++) {
-        errorGyro[i] = mpu[i + 3] - lastGyro[i];
-        lastGyro[i] = mpu[i + 3];
-      }
-    } while ((errorGyro[0] > MAX_GYRO_QUIET) || (errorGyro[0] < MIN_GYRO_QUIET) ||  //标定静止
-             (errorGyro[1] > MAX_GYRO_QUIET) || (errorGyro[1] < MIN_GYRO_QUIET) ||
-             (errorGyro[2] > MAX_GYRO_QUIET) || (errorGyro[2] < MIN_GYRO_QUIET));
+  /* 自动开始一次DMA采样（双缓冲） */
+  if (res == HAL_OK && who == MPU_ID) {
+    /* 启动连续DMA采样 */
+    /* 第一次启动在索引 CurIndex=0 的缓冲区 */
+    (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
+                               ImuBuf[CurIndex], FRAME_LEN);
   }
 
-  // 采集356组数据，其中前100组作为预热丢弃，后256组用于计算偏移量
-  for (i = 0; i < 356; i++) {
-    MPU_GetData();
-    if (i >= 100) {
-      uint8_t k;
-      // 累加各轴的数据
-      for (k = 0; k < 6; k++) {
-        buffer[k] += mpu[k];
-      }
-    }
-  }
+  return (res == HAL_OK && who == MPU_ID) ? HAL_OK : HAL_ERROR;
+}
 
-  // 计算各轴的平均偏移量（256个样本的平均值，右移8位相当于除以256）
-  for (i = 0; i < 6; i++) {
-    mpuOffset[i] = buffer[i] >> 8;
-  }
-  // 将校准后的偏移量写入Flash存储
-  FLASH_Write(mpuOffset, 6);
+/* 连续采样：DMA完成回调里翻转缓冲并续传   */
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef* Hi2c) {
+  if (Hi2c->Instance != I2C1) return;
+  FrameSeq++;
+  HasFrame = 1;
+  CurIndex ^= 1U; /* 切换到另一块缓冲写入下一帧 */
+  (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
+                             ImuBuf[CurIndex], FRAME_LEN);
+}
 
-  // 恢复定时器中断
-  // HAL_TIM_Base_Start_IT(&htim1);
+/* 错误自恢复，避免总线卡死后停止采样  */
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef* Hi2c) {
+  if (Hi2c->Instance != I2C1) return;
+  HAL_I2C_DeInit(Hi2c);
+  HAL_Delay(2);
+  HAL_I2C_Init(Hi2c);
+  (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
+                             ImuBuf[CurIndex], FRAME_LEN);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 将最近完成的一帧解析并写入全局结构体 MPU6050                              */
+/* -------------------------------------------------------------------------- */
+HAL_StatusTypeDef MPU_GetData(void) {
+  if (!HasFrame) return HAL_BUSY;
+
+  /* 取“上一块”完成的缓冲（当前 CurIndex 正在DMA写入） */
+  uint8_t ReadyIndex;
+  __disable_irq();
+  ReadyIndex = CurIndex ^ 1U;
+  __enable_irq();
+
+  uint8_t buf[FRAME_LEN];
+  /* 快拷贝14字节到栈上，避免被DMA覆盖 */
+  __disable_irq();
+  memcpy(buf, ImuBuf[ReadyIndex], FRAME_LEN);
+  __enable_irq();
+
+  MPU_t tmp;
+  tmp.accX = (int16_t)(buf[0] << 8 | buf[1])/*  - MpuOffset[0] */;
+  tmp.accY = (int16_t)(buf[2] << 8 | buf[3])/*  - MpuOffset[1] */;
+  tmp.accZ = (int16_t)(buf[4] << 8 | buf[5])/*  - MpuOffset[2] */;
+  /* 跳过温度 buf[6], buf[7] */
+  tmp.gyroX = (int16_t)(buf[8] << 8 | buf[9])/*  - MpuOffset[3] */;
+  tmp.gyroY = (int16_t)(buf[10] << 8 | buf[11])/*  - MpuOffset[4] */;
+  tmp.gyroZ = (int16_t)(buf[12] << 8 | buf[13])/*  - MpuOffset[5] */;
+
+  /* 原子更新全局结构体 */
+  __disable_irq();
+  MPU6050 = tmp;
+  __enable_irq();
+
+  return HAL_OK;
 }

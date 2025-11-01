@@ -1,11 +1,11 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
 
-#include "ALL_DATA.h"
 #include "MPU6050_Regs.h"
+#include "main.h"
 
 uint8_t MPU6050_Init(void);
-void MPU_GetData(void);
+HAL_StatusTypeDef MPU_GetData(void);
 void MPU_SetOffset(void);
 
 #endif  // !__MPU6050_H

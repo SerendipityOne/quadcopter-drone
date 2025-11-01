@@ -66,8 +66,9 @@
 #define MPU_FIFO_CNTH_REG    0X72  //FIFO计数寄存器高八位
 #define MPU_FIFO_CNTL_REG    0X73  //FIFO计数寄存器低八位
 #define MPU_FIFO_RW_REG      0X74  //FIFO读写寄存器
-#define MPU_WHO_AM_I    0X75  //器件ID寄存器
+#define MPU_WHO_AM_I         0X75  //器件ID寄存器
 
 #define MPU_ADDR             0XD0
+#define MPU_ID               0x68
 
 #endif  // !__MPU6050_REGS_H

@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "gpio.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usb_device.h"
 
@@ -86,9 +88,12 @@ int main(void) {
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_TIM2_Init();
   MX_USB_DEVICE_Init();
   MX_TIM1_Init();
+  MX_I2C1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   All_Init();
   /* USER CODE END 2 */
@@ -96,13 +101,10 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-    if (taskState.state == TASK_RUN) {
-      MPU_GetData();
-      GetAngle(&MPU6050, &Angle, 0.003f);
-      taskState.state = TASK_STOP;
+    if (taskState.ANTO_RUN == RUN) {
+      taskState.ANTO_RUN = STOP;
+      ANTO_polling();
     }
-    
-    ANTO_polling();  //匿名上位机发送数据
 
     Pilot_LED();
     /* USER CODE END WHILE */

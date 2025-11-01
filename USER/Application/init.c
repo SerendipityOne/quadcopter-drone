@@ -23,6 +23,8 @@ uint8_t USB_Send_Buff[64];     // USB发送缓冲区
 extern TIM_HandleTypeDef htim1;
 
 void All_Init(void) {
+  NVIC_Init();
+
   USB_HID_PowerOff();
   delay_ms(100);
   USB_HID_PowerOn();
@@ -30,10 +32,35 @@ void All_Init(void) {
   Motor_Init();
   MPU6050_Init();
 
-  imu_rest();
-
   // delay_ms(3000);
-	// MPU_SetOffset();
+  // MPU_SetOffset();
 
-  HAL_TIM_Base_Start_IT(&htim1);
+  Fc_Init();
+
+  // imu_rest();
+}
+
+void NVIC_Init(void) {
+  /* 1) TIM1：3ms节拍（最高） */
+  HAL_NVIC_SetPriority(TIM1_UP_IRQn, 0, 1);
+  HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
+
+  /* 2) I2C1 的 DMA（次高） */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 1, 0);  // I2C1_RX DMA
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 1, 1);  // I2C1_TX DMA（若用）
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+
+  /* 3) I2C1 事件/错误 */
+  HAL_NVIC_SetPriority(I2C1_ER_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(I2C1_ER_IRQn);
+  HAL_NVIC_SetPriority(I2C1_EV_IRQn, 2, 1);
+  HAL_NVIC_EnableIRQ(I2C1_EV_IRQn);
+
+  /* 4) USB：如使用，可放到 3,2（或 3,1） */
+  HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
+
+  /* 5) PendSV 最低（飞控底半部） */
+  HAL_NVIC_SetPriority(PendSV_IRQn, 3, 3);
 }

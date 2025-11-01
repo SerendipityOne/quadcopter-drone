@@ -47,10 +47,8 @@ void imu_rest(void) {
 void GetAngle(const MPU_t* mpu, Ange_t* ange, float dt) {
   volatile struct V Gravity, Acc, Gyro, AccGravity;
 
-  // static float KpDef = 0.5f;
-  static float KpDef = 0.0f;
-  static float KiDef = 0.0f;
-  // static float KiDef = 0.0003f;
+  static float KpDef = 0.5f;
+  static float KiDef = 0.0003f;
   //		static  float KiDef = 0.00001f;
 
   float q0_t, q1_t, q2_t, q3_t;

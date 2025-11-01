@@ -10,6 +10,8 @@
 #define FAILED   1
 #define ACK      0
 #define NACK     1
+
+#define IIC_DELAY_TIME 3
 //**********************************************************
 /*引脚配置层*/
 
@@ -21,7 +23,7 @@
   */
 void MyI2C_W_SCL(uint8_t BitValue) {
   HAL_GPIO_WritePin(SCL_PORT, SCL_PIN, (GPIO_PinState)BitValue);  //根据BitValue，设置SCL引脚的电平
-  delay_us(10);                                                   //延时10us，防止时序频率超过要求
+  delay_us(IIC_DELAY_TIME);                                                   //延时10us，防止时序频率超过要求
 }
 
 /**
@@ -33,7 +35,7 @@ void MyI2C_W_SCL(uint8_t BitValue) {
 void MyI2C_W_SDA(uint8_t BitValue) {
   HAL_GPIO_WritePin(SDA_PORT, SDA_PIN, (GPIO_PinState)BitValue);  //根据BitValue，设置SDA引脚的电平，BitValue要实现非0即1的特性
 
-  delay_us(10);  //延时10us，防止时序频率超过要求
+  delay_us(IIC_DELAY_TIME);  //延时10us，防止时序频率超过要求
 }
 
 /**
@@ -45,7 +47,7 @@ void MyI2C_W_SDA(uint8_t BitValue) {
 uint8_t MyI2C_R_SDA(void) {
   uint8_t BitValue;
   BitValue = HAL_GPIO_ReadPin(SDA_PORT, SDA_PIN);  //读取SDA电平
-  delay_us(10);                                    //延时10us，防止时序频率超过要求
+  delay_us(IIC_DELAY_TIME);                                    //延时10us，防止时序频率超过要求
   return BitValue;                                 //返回SDA电平
 }
 

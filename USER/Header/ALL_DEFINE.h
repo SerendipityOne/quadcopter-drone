@@ -11,5 +11,6 @@
 #include "MPU6050.h"
 #include "USB_HID.h"
 #include "imu.h"
+#include "fc.h"
 
 #endif  // !__ALL_USER_DEFINE_H
