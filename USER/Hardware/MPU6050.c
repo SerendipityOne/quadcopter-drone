@@ -12,7 +12,7 @@
 //**************************************************************
 int16_t MpuOffset[6];
 
-extern MPU_t MPU6050;
+static volatile int16_t* mpu = (int16_t*)&MPU6050;
 //**************************************************************
 // 双缓冲与状态
 static uint8_t ImuBuf[2][FRAME_LEN];   /* 双缓冲 */
@@ -24,8 +24,13 @@ static HAL_StatusTypeDef MPU6050_WriteReg(uint8_t reg, uint8_t val) {
   return HAL_I2C_Mem_Write(&hi2c1, MPU_ADDR, reg, MPU_REG_ADDR_SIZE, &val, 1, MPU_I2C_TIMEOUT);
 }
 
-static HAL_StatusTypeDef MPU6050_ReadRegs(uint8_t reg, uint8_t* data, uint16_t Len) {
-  return HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR, reg, MPU_REG_ADDR_SIZE, data, Len, MPU_I2C_TIMEOUT);
+static HAL_StatusTypeDef MPU6050_ReadRegs(uint8_t reg, uint8_t* data, uint16_t len) {
+  return HAL_I2C_Mem_Read(&hi2c1, MPU_ADDR, reg, MPU_REG_ADDR_SIZE, data, len, MPU_I2C_TIMEOUT);
+}
+
+static void MPU_GetAccGyro(void) {
+  (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
+                             ImuBuf[CurIndex], FRAME_LEN);
 }
 //**************************************************************
 /* 初始化MPU6050 */
@@ -46,14 +51,13 @@ HAL_StatusTypeDef MPU6050_Init(void) {
   res = MPU6050_ReadRegs(MPU_WHO_AM_I, &who, 1);
 
   /* 从Flash读取零偏*/
-  // FLASH_Read(MpuOffset, 6);
+  FLASH_Read(MpuOffset, 6);
 
   /* 自动开始一次DMA采样（双缓冲） */
   if (res == HAL_OK && who == MPU_ID) {
     /* 启动连续DMA采样 */
     /* 第一次启动在索引 CurIndex=0 的缓冲区 */
-    (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
-                               ImuBuf[CurIndex], FRAME_LEN);
+    MPU_GetAccGyro();
   }
 
   return (res == HAL_OK && who == MPU_ID) ? HAL_OK : HAL_ERROR;
@@ -65,8 +69,7 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef* Hi2c) {
   FrameSeq++;
   HasFrame = 1;
   CurIndex ^= 1U; /* 切换到另一块缓冲写入下一帧 */
-  (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
-                             ImuBuf[CurIndex], FRAME_LEN);
+  MPU_GetAccGyro();
 }
 
 /* 错误自恢复，避免总线卡死后停止采样  */
@@ -75,8 +78,7 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef* Hi2c) {
   HAL_I2C_DeInit(Hi2c);
   HAL_Delay(2);
   HAL_I2C_Init(Hi2c);
-  (void)HAL_I2C_Mem_Read_DMA(&hi2c1, MPU_ADDR, MPU_ACCEL_XOUTH_REG, MPU_REG_ADDR_SIZE,
-                             ImuBuf[CurIndex], FRAME_LEN);
+  MPU_GetAccGyro();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -86,7 +88,7 @@ HAL_StatusTypeDef MPU_GetData(void) {
   if (!HasFrame) return HAL_BUSY;
 
   /* 取“上一块”完成的缓冲（当前 CurIndex 正在DMA写入） */
-  uint8_t ReadyIndex;
+  uint8_t ReadyIndex, i;
   __disable_irq();
   ReadyIndex = CurIndex ^ 1U;
   __enable_irq();
@@ -97,19 +99,75 @@ HAL_StatusTypeDef MPU_GetData(void) {
   memcpy(buf, ImuBuf[ReadyIndex], FRAME_LEN);
   __enable_irq();
 
-  MPU_t tmp;
-  tmp.accX = (int16_t)(buf[0] << 8 | buf[1])/*  - MpuOffset[0] */;
-  tmp.accY = (int16_t)(buf[2] << 8 | buf[3])/*  - MpuOffset[1] */;
-  tmp.accZ = (int16_t)(buf[4] << 8 | buf[5])/*  - MpuOffset[2] */;
-  /* 跳过温度 buf[6], buf[7] */
-  tmp.gyroX = (int16_t)(buf[8] << 8 | buf[9])/*  - MpuOffset[3] */;
-  tmp.gyroY = (int16_t)(buf[10] << 8 | buf[11])/*  - MpuOffset[4] */;
-  tmp.gyroZ = (int16_t)(buf[12] << 8 | buf[13])/*  - MpuOffset[5] */;
+  for (i = 0; i < 7; i++) {
+    if (i < 3)  //以下对加速度做卡尔曼滤波
+    {
+      mpu[i] = (((int16_t)buf[i << 1] << 8) | buf[(i << 1) + 1]) - MpuOffset[i];  //整合为16bit，并减去水平静止校准值
 
-  /* 原子更新全局结构体 */
-  __disable_irq();
-  MPU6050 = tmp;
-  __enable_irq();
+      static struct _1_ekf_filter ekf[3] = {{0.02, 0, 0, 0, 0.001, 0.543},
+                                            {0.02, 0, 0, 0, 0.001, 0.543},
+                                            {0.02, 0, 0, 0, 0.001, 0.543}};
+      kalman_1(&ekf[i], (float)mpu[i]);  //一维卡尔曼
+      mpu[i] = (int16_t)ekf[i].out;
+
+    } else if (i >= 4)  //以下对角速度做一阶低通滤波，跳过温度
+    {
+      mpu[i - 1] = (((int16_t)buf[i << 1] << 8) | buf[(i << 1) + 1]) - MpuOffset[i - 1];  //整合为16bit，并减去水平静止校准值
+      uint8_t k = i - 4;
+      const float factor = 0.15f;  //滤波因素
+      static float tBuff[3];
+
+      mpu[i - 1] = tBuff[k] = tBuff[k] * (1 - factor) + mpu[i - 1] * factor;
+    }
+  }
 
   return HAL_OK;
 }
+
+void MPU_SetOffset(void) {  //校准
+
+  int32_t buffer[6] = {0};
+  int16_t i;
+  uint8_t k = 30;
+  const int8_t MAX_GYRO_QUIET = 5;
+  const int8_t MIN_GYRO_QUIET = -5;
+  /*           wait for calm down    	                                                          */
+  int16_t LastGyro[3] = {0};
+  int16_t ErrorGyro[3];
+  /*           set offset initial to zero    		*/
+
+  memset(MpuOffset, 0, sizeof(MpuOffset));
+  MpuOffset[2] = 8192;  //set offset from the 8192
+
+  while (k--)  //30次静止则判定飞行器处于静止状态
+  {
+    do {
+      delay_ms(10);
+      MPU_GetData();
+      for (i = 0; i < 3; i++) {
+        ErrorGyro[i] = mpu[i + 3] - LastGyro[i];
+        LastGyro[i] = mpu[i + 3];
+      }
+    } while ((ErrorGyro[0] > MAX_GYRO_QUIET) || (ErrorGyro[0] < MIN_GYRO_QUIET)  //标定静止
+             || (ErrorGyro[1] > MAX_GYRO_QUIET) || (ErrorGyro[1] < MIN_GYRO_QUIET) || (ErrorGyro[2] > MAX_GYRO_QUIET) || (ErrorGyro[2] < MIN_GYRO_QUIET));
+  }
+
+  /*           throw first 100  group data and make 256 group average as offset                    */
+  for (i = 0; i < 356; i++)  //水平校准
+  {
+    MPU_GetData();
+    if (100 <= i)  //取256组数据进行平均
+    {
+      uint8_t k;
+      for (k = 0; k < 6; k++) {
+        buffer[k] += mpu[k];
+      }
+    }
+  }
+
+  for (i = 0; i < 6; i++) {
+    MpuOffset[i] = buffer[i] >> 8;  // 右移8位，相当于除以256，得到平均偏移值
+  }
+  FLASH_Write(MpuOffset, 6);  //将数据写到FLASH中，一共有6个int16数据
+}
+/**************************************END OF FILE*************************************/

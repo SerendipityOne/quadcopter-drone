@@ -32,12 +32,10 @@ void All_Init(void) {
   Motor_Init();
   MPU6050_Init();
 
-  // delay_ms(3000);
+  // delay_ms(5000);
   // MPU_SetOffset();
 
   Fc_Init();
-
-  // imu_rest();
 }
 
 void NVIC_Init(void) {

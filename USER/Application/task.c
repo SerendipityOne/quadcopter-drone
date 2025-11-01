@@ -2,7 +2,7 @@
 #include "ALL_DEFINE.h"
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-  static uint32_t ANTO_Count = 0;
+  static volatile uint32_t ANTO_Count = 0;
   if (htim->Instance == TIM1) {  // 3ms
 
     Fc_RequestTickIsr();
