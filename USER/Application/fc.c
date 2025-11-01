@@ -1,6 +1,7 @@
 #include "fc.h"
-#include "MPU6050.h"  // 提供 g_mpu 与 MPU_GetData()
-#include "tim.h"      // 需要 htim1, htim3
+#include "ALL_DEFINE.h"
+
+extern TIM_HandleTypeDef htim1, htim3;
 
 /* ---------- 顶/底半部共享状态（命名按你的要求） ---------- */
 volatile uint8_t FcReq = 0;                    // 有一帧待执行
@@ -28,15 +29,6 @@ void Fc_RequestTickIsr(void) {
 }
 
 void Fc_RunOnce(void) {
-  /* 计算 dt，考虑16位回绕 */
-  uint32_t prev = TimeStampPrevUs;
-  uint32_t curr = TimeStampCurrUs;
-  uint32_t DeltaUs = (curr >= prev) ? (curr - prev) : (curr + 0x10000u - prev);
-  TimeStampPrevUs = curr;
-
-  float dt = (prev == 0) ? 0.003f : (DeltaUs * 1e-6f);
-  LastDt = dt;
-
   /* 获取IMU最新原始数据（DMA双缓冲在 MPU6050.c 中后台运行） */
   (void)MPU_GetData();  // 先只获取原始数据，姿态解算后续再接
 }

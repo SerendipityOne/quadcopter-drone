@@ -20,8 +20,6 @@ int16_t motor_pwm_value[4];
 uint8_t USB_Receive_Buff[64];  // USB接收缓冲区
 uint8_t USB_Send_Buff[64];     // USB发送缓冲区
 
-extern TIM_HandleTypeDef htim1;
-
 void All_Init(void) {
   NVIC_Init();
 
@@ -32,7 +30,7 @@ void All_Init(void) {
   Motor_Init();
   MPU6050_Init();
 
-  // delay_ms(5000);
+  // delay_ms(3000);
   // MPU_SetOffset();
 
   Fc_Init();
