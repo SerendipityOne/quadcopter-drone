@@ -51,7 +51,7 @@ HAL_StatusTypeDef MPU6050_Init(void) {
   res = MPU6050_ReadRegs(MPU_WHO_AM_I, &who, 1);
 
   /* 从Flash读取零偏*/
-  MpuCalib_Load(MpuOffset);
+  MpuOffset_Read(MpuOffset);
 
   /* 自动开始一次DMA采样（双缓冲） */
   if (res == HAL_OK && who == MPU_ID) {
@@ -168,6 +168,6 @@ void MPU_SetOffset(void) {  //校准
   for (i = 0; i < 6; i++) {
     MpuOffset[i] = buffer[i] >> 8;  // 右移8位，相当于除以256，得到平均偏移值
   }
-  MpuCalib_Save(MpuOffset);
+  MpuOffset_Write(MpuOffset);
 }
 /**************************************END OF FILE*************************************/

@@ -3,4 +3,7 @@
 
 #include "main.h"
 
-#endif // !__TASK_H
+void Task_Init(void);
+void Task_Run(void);
+
+#endif  // !__TASK_H

@@ -29,7 +29,7 @@ void All_Init(void) {
   // delay_ms(5000);
   // MPU_SetOffset();
 
-  Fc_Init();
+  Task_Init();
 }
 
 void NVIC_Init(void) {

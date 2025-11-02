@@ -2287,16 +2287,6 @@
               <FileType>5</FileType>
               <FilePath>..\USER\Application\ANO_DT.h</FilePath>
             </File>
-            <File>
-              <FileName>fc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\Application\fc.c</FilePath>
-            </File>
-            <File>
-              <FileName>fc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\Application\fc.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -2376,16 +2366,6 @@
               <FileName>delay.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\System\delay.h</FilePath>
-            </File>
-            <File>
-              <FileName>MyI2C.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\System\MyI2C.c</FilePath>
-            </File>
-            <File>
-              <FileName>MyI2C.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\System\MyI2C.h</FilePath>
             </File>
             <File>
               <FileName>flash.c</FileName>
