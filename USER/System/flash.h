@@ -2,12 +2,13 @@
 #define __FLASH_H
 
 #include "main.h"
+#include "ALL_DATA.h"
 
-#define FLASH_Start_Addr 0x08007C00  // flash写起始地址
-#define FLASH_End_Addr   0x08007FFF  // flash写结束地址
+#define MPU_CALIB_FLASH_PAGE_ADDR ((uint32_t)0x0800FC00u)
+#define MPU_CALIB_FLASH_PAGE_SIZE (1024u)
 
-// FLASH函数声明
-void FLASH_Read(int16_t* buffer, uint8_t length);
-HAL_StatusTypeDef FLASH_Write(int16_t* data, uint8_t length);
+bool MpuCalib_Load(int16_t outOffsets[6]);       // 读取，如果有效返回 true
+bool MpuCalib_Save(const int16_t inOffsets[6]);  // 保存，成功返回 true
+bool MpuCalib_Clear(void);                       // 擦除该页（清掉校准数据）
 
 #endif  // !__FLASH_H

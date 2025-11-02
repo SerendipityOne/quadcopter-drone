@@ -10,7 +10,7 @@
 #define MPU_REG_ADDR_SIZE I2C_MEMADD_SIZE_8BIT
 #define FRAME_LEN         14 /* ACC(6) + TEMP(2) + GYR(6) */
 //**************************************************************
-int16_t MpuOffset[6];
+static int16_t MpuOffset[6] = {0};
 
 static volatile int16_t* mpu = (int16_t*)&MPU6050;
 //**************************************************************
@@ -51,7 +51,7 @@ HAL_StatusTypeDef MPU6050_Init(void) {
   res = MPU6050_ReadRegs(MPU_WHO_AM_I, &who, 1);
 
   /* 从Flash读取零偏*/
-  FLASH_Read(MpuOffset, 6);
+  MpuCalib_Load(MpuOffset);
 
   /* 自动开始一次DMA采样（双缓冲） */
   if (res == HAL_OK && who == MPU_ID) {
@@ -82,7 +82,7 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef* Hi2c) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 将最近完成的一帧解析并写入全局结构体 MPU6050                              */
+/* 将最近完成的一帧解析并写入全局结构体 MPU6050                                     */
 /* -------------------------------------------------------------------------- */
 HAL_StatusTypeDef MPU_GetData(void) {
   if (!HasFrame) return HAL_BUSY;
@@ -168,6 +168,6 @@ void MPU_SetOffset(void) {  //校准
   for (i = 0; i < 6; i++) {
     MpuOffset[i] = buffer[i] >> 8;  // 右移8位，相当于除以256，得到平均偏移值
   }
-  FLASH_Write(MpuOffset, 6);  //将数据写到FLASH中，一共有6个int16数据
+  MpuCalib_Save(MpuOffset);
 }
 /**************************************END OF FILE*************************************/

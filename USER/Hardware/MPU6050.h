@@ -4,7 +4,7 @@
 #include "MPU6050_Regs.h"
 #include "main.h"
 
-uint8_t MPU6050_Init(void);
+HAL_StatusTypeDef MPU6050_Init(void);
 HAL_StatusTypeDef MPU_GetData(void);
 void MPU_SetOffset(void);
 

@@ -23,14 +23,10 @@ uint8_t USB_Send_Buff[64];     // USB发送缓冲区
 void All_Init(void) {
   NVIC_Init();
 
-  USB_HID_PowerOff();
-  delay_ms(100);
-  USB_HID_PowerOn();
-
   Motor_Init();
   MPU6050_Init();
 
-  // delay_ms(3000);
+  // delay_ms(5000);
   // MPU_SetOffset();
 
   Fc_Init();

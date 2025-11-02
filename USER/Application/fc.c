@@ -31,6 +31,7 @@ void Fc_RequestTickIsr(void) {
 void Fc_RunOnce(void) {
   /* 获取IMU最新原始数据（DMA双缓冲在 MPU6050.c 中后台运行） */
   (void)MPU_GetData();  // 先只获取原始数据，姿态解算后续再接
+  GetAngle(&MPU6050, &Angle, 0.003f);
 }
 
 float Fc_GetLastDt(void) {

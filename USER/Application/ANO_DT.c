@@ -229,9 +229,8 @@ void ANTO_polling(void)  //
       status = 1;
       break;
     case 1:
-      ANTO_Send(ANTO_MPU_MAGIC);  //发送MPU6050
-      // ANTO_Send(ANTO_STATUS);  //发送姿态数据
-      // delay_ms(30);
+      // ANTO_Send(ANTO_MPU_MAGIC);  //发送MPU6050
+      ANTO_Send(ANTO_STATUS);  //发送姿态数据
       // ANTO_Send(ANTO_RCDATA);  //发送遥控数据
       // delay_ms(30);            //如果采用蓝牙，延时一下让蓝牙发送完成
 

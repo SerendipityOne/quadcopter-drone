@@ -118,6 +118,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>/</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -154,18 +155,18 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>98</LineNumber>
+          <LineNumber>175</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134254416</Address>
+          <Address>134219508</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/main.c</Filename>
+          <Filename>..\USER\Application\ANO_DT.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\quadcopter_drone\../Core/Src/main.c\98</Expression>
+          <Expression>\\quadcopter_drone\../USER/Application/ANO_DT.c\175</Expression>
         </Bp>
       </Breakpoint>
       <Tracepoint>
