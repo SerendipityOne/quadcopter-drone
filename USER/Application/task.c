@@ -28,4 +28,3 @@ void Task_Run(void) {
   (void)MPU_GetData();
   GetAngle(&MPU6050, &Angle, 0.003f);
 }
-

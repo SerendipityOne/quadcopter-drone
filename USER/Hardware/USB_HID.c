@@ -56,29 +56,3 @@ void USB_HID_Send(void) {
     notfull_timeout++;
   }
 }
-
-/**
- * @brief  模拟USB HID设备断电
- * @param  None
- * @retval None
- */
-void USB_HID_PowerOff(void) {
-  // 停止USB设备
-  USBD_Stop(&hUsbDeviceFS);
-  // 清空缓冲区
-  hid_datatemp_begin = 0;
-  hid_datatemp_end = 0;
-}
-
-/**
- * @brief  模拟USB HID设备上电
- * @param  None
- * @retval None
- */
-void USB_HID_PowerOn(void) {
-  // 启动USB设备
-  USBD_Start(&hUsbDeviceFS);
-  // 重置缓冲区指针
-  hid_datatemp_begin = 0;
-  hid_datatemp_end = 0;
-}
