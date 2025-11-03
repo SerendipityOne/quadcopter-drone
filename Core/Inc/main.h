@@ -72,10 +72,22 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOB
 #define LED4_Pin GPIO_PIN_1
 #define LED4_GPIO_Port GPIOB
+#define NRF_CSN_Pin GPIO_PIN_12
+#define NRF_CSN_GPIO_Port GPIOB
+#define NRF_SCK_Pin GPIO_PIN_13
+#define NRF_SCK_GPIO_Port GPIOB
+#define NRF_MISO_Pin GPIO_PIN_14
+#define NRF_MISO_GPIO_Port GPIOB
+#define NRF_MOSI_Pin GPIO_PIN_15
+#define NRF_MOSI_GPIO_Port GPIOB
+#define NRF_IRQ_Pin GPIO_PIN_8
+#define NRF_IRQ_GPIO_Port GPIOA
 #define MPU_SCL_Pin GPIO_PIN_6
 #define MPU_SCL_GPIO_Port GPIOB
 #define MPU_SDA_Pin GPIO_PIN_7
 #define MPU_SDA_GPIO_Port GPIOB
+#define NRF_CE_Pin GPIO_PIN_8
+#define NRF_CE_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

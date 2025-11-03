@@ -12,5 +12,6 @@
 #include "USB_HID.h"
 #include "imu.h"
 #include "task.h"
+#include "NRF24L01.h"
 
 #endif  // !__ALL_USER_DEFINE_H
