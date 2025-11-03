@@ -2397,6 +2397,26 @@
               <FileType>5</FileType>
               <FilePath>..\USER\Application\ANO_DT.h</FilePath>
             </File>
+            <File>
+              <FileName>control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\Application\control.c</FilePath>
+            </File>
+            <File>
+              <FileName>control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\Application\control.h</FilePath>
+            </File>
+            <File>
+              <FileName>remote.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\Application\remote.c</FilePath>
+            </File>
+            <File>
+              <FileName>remote.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\Application\remote.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -2531,6 +2551,16 @@
               <FileName>my_math.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\Math\my_math.h</FilePath>
+            </File>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\Math\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>pid.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\Math\pid.h</FilePath>
             </File>
           </Files>
         </Group>

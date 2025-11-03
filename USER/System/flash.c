@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "stm32f1xx_hal.h"
+#include "flash.h"
 
 #define MPU_FLASH_ADDR ((uint32_t)0x0800FC00)
 

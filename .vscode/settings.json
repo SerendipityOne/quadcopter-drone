@@ -51,6 +51,9 @@
 		"stm32f1xx_hal_def.h": "c",
 		"stm32_hal_legacy.h": "c",
 		"stm32f1xx.h": "c",
-		"nrf24l01.h": "c"
+		"nrf24l01.h": "c",
+		"control.h": "c",
+		"stdbool.h": "c",
+		"pid.h": "c"
 	},
 }

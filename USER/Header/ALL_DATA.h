@@ -25,10 +25,10 @@ typedef unsigned long long uint64_t;
 //#define NULL 0
 extern volatile uint32_t uwTick;  //    系统滴答计数器
 // *****************************************************************************
-typedef enum {
-  FALSE = 0,
-  TRUE = !FALSE
-} bool;
+// typedef enum {
+//  FALSE = 0,
+//  TRUE = !FALSE
+// } bool;
 
 typedef struct {
   int16_t accX;   // 加速度计X轴
