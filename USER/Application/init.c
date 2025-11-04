@@ -26,7 +26,7 @@ void All_Init(void) {
   Motor_Init();    // 电机初始化
   MPU6050_Init();  // MPU6050初始化
 
-  // delay_ms(5000); MPU_SetOffset(); // 校准MPU6050零漂
+  delay_ms(5000); MPU_SetOffset(); // 校准MPU6050零漂
 
   NRF24L01_Init();  // NRF24L012.4G遥控通信初始化
   Task_Init();      // 主任务初始化

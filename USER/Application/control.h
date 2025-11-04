@@ -90,6 +90,6 @@
 #define EXIT_251        251
 #define EXIT_250        250
 
-extern void FlightPidControl(float FightControlTime);
-extern void MotorControl(void);
+void FlightPidControl(float FightControlTime);
+void MotorControl(void);
 #endif

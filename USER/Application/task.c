@@ -27,4 +27,7 @@ void Task_Init(void) {
 void Task_Run(void) {
   (void)MPU_GetData();
   GetAngle(&MPU6050, &Angle, 0.003f);
+  RC_Analy();
+  FlightPidControl(0.003f);
+  MotorControl();
 }

@@ -54,6 +54,7 @@
 		"nrf24l01.h": "c",
 		"control.h": "c",
 		"stdbool.h": "c",
-		"pid.h": "c"
+		"pid.h": "c",
+		"remote.h": "c"
 	},
 }

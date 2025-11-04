@@ -3,4 +3,7 @@
 
 #include "main.h"
 
+void RC_Analy(void);
+void remote_unlock(void);
+
 #endif // !__REMOTE_H
