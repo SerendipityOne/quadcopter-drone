@@ -1,5 +1,6 @@
 #include "USB_HID.h"
 #include "usbd_customhid.h"
+#include "usb_device.h"
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern uint8_t USB_Send_Buff[64];
@@ -55,4 +56,32 @@ void USB_HID_Send(void) {
   } else {
     notfull_timeout++;
   }
+}
+
+void USB_Connect(void) {
+  // 1) 停止/反初始化 USB 设备栈，关 USB 时钟，释放对 PA11/PA12 的占用
+  USBD_Stop(&hUsbDeviceFS);
+  USBD_DeInit(&hUsbDeviceFS);
+  __HAL_RCC_USB_CLK_DISABLE();
+
+  // 2) 将 PA12 配置为开漏输出并拉低，模拟“拔掉”
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_12;           // D+ 引脚
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;  // 开漏
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+
+  HAL_Delay(20);  // >=2.5 ms 即可，一般取 10~50 ms 更稳
+
+  // 3) 释放 PA12 引脚
+  HAL_GPIO_DeInit(GPIOA, GPIO_PIN_12);
+
+  // 4) 重新开 USB 时钟并按 CubeMX 方式重新初始化 USB 设备（HID）
+  __HAL_RCC_USB_CLK_ENABLE();
+
+  // 如果你用的是 CubeMX 生成的 USB_DEVICE_Init()，直接调它
+  MX_USB_DEVICE_Init();
 }
