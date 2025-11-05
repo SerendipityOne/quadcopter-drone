@@ -1,5 +1,6 @@
 #include "USB_HID.h"
 #include "usbd_customhid.h"
+#include "usb_device.h"
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern uint8_t USB_Send_Buff[64];
@@ -58,6 +59,7 @@ void USB_HID_Send(void) {
 }
 
 void USB_Connect(void) {
+  // 1) 停止/反初始化 USB 设备栈，关 USB 时钟，释放对 PA11/PA12 的占用
   USBD_Stop(&hUsbDeviceFS);
   USBD_DeInit(&hUsbDeviceFS);
   __HAL_RCC_USB_CLK_DISABLE();
@@ -83,4 +85,3 @@ void USB_Connect(void) {
   // 如果你用的是 CubeMX 生成的 USB_DEVICE_Init()，直接调它
   MX_USB_DEVICE_Init();
 }
-

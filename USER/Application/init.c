@@ -25,12 +25,14 @@ void All_Init(void) {
   PID_Param_Init();
 
   USB_Connect();
+  PID_Param_Init();
+
+  USB_Connect();
 
   Motor_Init();    // 电机初始化
   MPU6050_Init();  // MPU6050初始化
 
-  delay_ms(5000);
-  MPU_SetOffset();  // 校准MPU6050零漂
+  // delay_ms(5000); MPU_SetOffset(); // 校准MPU6050零漂
 
   NRF24L01_Init();  // NRF24L012.4G遥控通信初始化
   Task_Init();      // 主任务初始化
@@ -61,7 +63,7 @@ void NVIC_Init(void) {
   HAL_NVIC_SetPriority(PendSV_IRQn, 3, 3);
 }
 
-void PID_Param_Init(void) {  //PID参数初始化
+void PID_Param_Init(void) { //PID参数初始化
 
   // pidRateX.kp = 3.f;
   // pidRateY.kp = 3.f;
@@ -95,3 +97,4 @@ void PID_Param_Init(void) {  //PID参数初始化
   pidRoll.kp = 10.0f;
   pidYaw.kp = 8.0f;
 }
+

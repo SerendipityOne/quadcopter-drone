@@ -21,7 +21,7 @@
 #define LED4_Toggle() HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin)                 //闪烁
 //--------------------------------------------------------
 
-LED_t LED = {500, ALL_FLASH_LIGHT};
+LED_t LED = {300, ALL_FLASH_LIGHT};
 
 /**
  * @brief LED指示灯控制函数
