@@ -5,7 +5,6 @@
 
 void USB_HID_Adddata(uint8_t* dataToSend, uint8_t length);
 void USB_HID_Send(void);
-void USB_HID_PowerOff(void);
-void USB_HID_PowerOn(void);
+void USB_Connect(void)；
 
 #endif // !__USB_HID_H

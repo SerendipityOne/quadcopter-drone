@@ -22,11 +22,15 @@ uint8_t USB_Send_Buff[64];     // USB发送缓冲区
 
 void All_Init(void) {
   NVIC_Init();  // 中断初始化
+  PID_Param_Init();
+
+  USB_Connect();
 
   Motor_Init();    // 电机初始化
   MPU6050_Init();  // MPU6050初始化
 
-  delay_ms(5000); MPU_SetOffset(); // 校准MPU6050零漂
+  delay_ms(5000);
+  MPU_SetOffset();  // 校准MPU6050零漂
 
   NRF24L01_Init();  // NRF24L012.4G遥控通信初始化
   Task_Init();      // 主任务初始化
@@ -55,4 +59,39 @@ void NVIC_Init(void) {
 
   /* 5) PendSV 最低（飞控底半部） */
   HAL_NVIC_SetPriority(PendSV_IRQn, 3, 3);
+}
+
+void PID_Param_Init(void) {  //PID参数初始化
+
+  // pidRateX.kp = 3.f;
+  // pidRateY.kp = 3.f;
+  // pidRateZ.kp = 6.0f;
+
+  // //	pidRateX.ki = 0.05f;
+  // //	pidRateY.ki = 0.05f;
+  // //	pidRateZ.ki = 0.02f;
+
+  // pidRateX.kd = 0.24f;
+  // pidRateY.kd = 0.24f;
+  // pidRateZ.kd = 0.3f;
+
+  // pidPitch.kp = 10.0f;
+  // pidRoll.kp = 10.0f;
+  // pidYaw.kp = 8.0f;
+
+  pidRateX.kp = 3.0f;
+  pidRateY.kp = 3.0f;
+  pidRateZ.kp = 6.0f;
+
+  pidRateX.ki = 0.1f;
+  pidRateY.ki = 0.1f;
+  pidRateZ.ki = 0.1f;
+
+  pidRateX.kd = 0.5f;
+  pidRateY.kd = 0.5f;
+  pidRateZ.kd = 0.5f;
+
+  pidPitch.kp = 10.0f;
+  pidRoll.kp = 10.0f;
+  pidYaw.kp = 8.0f;
 }
